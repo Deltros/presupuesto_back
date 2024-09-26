@@ -1,0 +1,5 @@
+lexik_jwt_authentication:
+    secret_key: '%kernel.project_dir%/config/jwt/private.pem' # Ruta a la clave privada
+    public_key: '%kernel.project_dir%/config/jwt/public.pem'   # Ruta a la clave pública
+    pass_phrase: 'realmadrid'                              # La passphrase que usaste al generar la clave privada
+    token_ttl: 3600                                           # Tiempo de vida del token (en segundos, 1 hora)
