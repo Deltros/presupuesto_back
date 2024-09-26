@@ -27,11 +27,11 @@ security:
             security: false  # Permitir acceso sin autenticación
 
         api:
-            pattern:   ^/api
+            pattern:   ^/
             stateless: true
             jwt: ~
 
     access_control:
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
