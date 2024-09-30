@@ -52,6 +52,6 @@ class AuthController extends AbstractController
                 'roles' => $user->getRoles(),
             ],
             'expires_at' => time() + $tokenTtl
-        ]);
+        ], 200);
     }
 }

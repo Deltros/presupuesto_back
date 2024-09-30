@@ -18,6 +18,10 @@ class Gasto
     #[ORM\JoinColumn(nullable: false)]
     private ?Tarjeta $tarjeta = null;
 
+    #[ORM\ManyToOne(targetEntity: GastoTipo::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?GastoTipo $gastoTipo = null;
+
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $descripcion = null;
 
@@ -43,6 +47,18 @@ class Gasto
     public function setTarjeta(?Tarjeta $tarjeta): self
     {
         $this->tarjeta = $tarjeta;
+
+        return $this;
+    }
+
+    public function geGastoTipo(): ?GastoTipo
+    {
+        return $this->gastoTipo;
+    }
+
+    public function setGastoTipo(?GastoTipo $gastoTipo): self
+    {
+        $this->gastoTipo = $gastoTipo;
 
         return $this;
     }

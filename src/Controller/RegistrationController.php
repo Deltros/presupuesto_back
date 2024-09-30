@@ -38,6 +38,6 @@ class RegistrationController extends AbstractController
 
         $token = $jwtManager->create($user);
 
-        return new JsonResponse(['token' => $token]);
+        return new JsonResponse(['token' => $token], 200);
     }
 }

@@ -2,11 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Gasto;
-use App\Entity\Tarjeta;
-use App\Repository\GastoRepository;
+use App\Service\GastoService;
 use App\Repository\TarjetaRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\GastoTipoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,36 +12,36 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class GastosController extends AbstractController
 {
-    private $gastoRepository;
+    private $gastoService;
     private $tarjetaRepository;
-    private $entityManager;
 
-    public function __construct(GastoRepository $gastoRepository, TarjetaRepository $tarjetaRepository, EntityManagerInterface $entityManager)
+    public function __construct(
+        GastoService $gastoService,
+        TarjetaRepository $tarjetaRepository, 
+        GastoTipoRepository $gastoTipoRepository)
     {
-        $this->gastoRepository = $gastoRepository;
-        $this->tarjetaRepository = $tarjetaRepository;
-        $this->entityManager = $entityManager;
+        $this->gastoService        = $gastoService;
+        $this->tarjetaRepository   = $tarjetaRepository;
+        $this->gastoTipoRepository = $gastoTipoRepository;
     }
 
     #[Route('/gastos/tipos', name: 'app_gastos_tipos')]
     public function getTipos(): JsonResponse
     {
-        $tipos = $this->testRepository->findAll();
+        $tipos = $this->gastoTipoRepository->findAll();
     
-        // Devuelve los datos serializados con el método json()
         return $this->json($tipos);
     }
 
     #[Route('/gastos/añadir', name: 'app_gastos_añadir', methods: ['POST'])]
     public function addGasto(Request $request): JsonResponse
     {
-        // Obtener datos del cuerpo de la solicitud
         $data = json_decode($request->getContent(), true);
-
         $descripcion = $data['descripcion'] ?? null;
         $valor       = $data['valor'] ?? null;
         $tarjetaId   = $data['tarjeta_id'] ?? null;
         $fechaGasto  = $data['fecha_gasto'] ?? null;
+        $tipoGastoId = $data['tipo_gasto_id'] ?? null;
 
         $fechaGasto = new \DateTime($fechaGasto);
 
@@ -52,20 +50,26 @@ class GastosController extends AbstractController
         }
 
         $tarjeta = $this->tarjetaRepository->find($tarjetaId);
-
         if (!$tarjeta) {
             return new JsonResponse(['error' => 'Tarjeta no encontrada'], 404);
         }
 
-        $gasto = new Gasto();
-        $gasto->setDescripcion($descripcion);
-        $gasto->setValor($valor);
-        $gasto->setTarjeta($tarjeta);
-        $gasto->setFechaGasto($fechaGasto);
+        $tipoGasto = $this->gastoTipoRepository->find($tipoGastoId);
+        if (!$tipoGasto) {
+            return new JsonResponse(['error' => 'Tipo de gasto no encontrado'], 404);
+        }
 
-        $this->entityManager->persist($gasto);
-        $this->entityManager->flush();
+        error_log("---------------------");
+        error_log(print_r($tipoGasto, true));
+        error_log("---------------------");
+        $gasto = $this->gastoService->crearGasto(
+            $descripcion, 
+            $valor, 
+            $tarjeta, 
+            $fechaGasto,
+            $tipoGasto);
 
-        return new JsonResponse(['status' => 'Gasto creado exitosamente'], 201);
+        return new JsonResponse(['status' => 'Gasto creado exitosamente', 'gasto_id' => $gasto->getId()], 201);
     }
+
 }
