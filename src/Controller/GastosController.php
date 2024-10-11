@@ -33,6 +33,21 @@ class GastosController extends AbstractController
         return $this->json($tipos);
     }
 
+    #[Route('/gastos/get', name: 'app_gastos_get', methods: ['GET'])]    
+    public function getGastos(Request $request): JsonResponse
+    {
+        $tarjetaId = $request->query->get('tarjeta_id');
+
+        $tarjeta = $this->tarjetaRepository->find($tarjetaId);
+        if (!$tarjeta) {
+            return new JsonResponse(['error' => 'Tarjeta no encontrada'], 404);
+        }
+
+        $gastos = $this->gastoService->findByTarjeta($tarjeta);
+    
+        return $this->json($gastos);
+    }
+
     #[Route('/gastos/añadir', name: 'app_gastos_añadir', methods: ['POST'])]
     public function addGasto(Request $request): JsonResponse
     {
@@ -59,9 +74,6 @@ class GastosController extends AbstractController
             return new JsonResponse(['error' => 'Tipo de gasto no encontrado'], 404);
         }
 
-        error_log("---------------------");
-        error_log(print_r($tipoGasto, true));
-        error_log("---------------------");
         $gasto = $this->gastoService->crearGasto(
             $descripcion, 
             $valor, 

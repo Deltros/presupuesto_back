@@ -6,14 +6,19 @@ use App\Entity\Gasto;
 use App\Entity\GastoTipo;
 use App\Entity\Tarjeta;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\GastoRepository;
+
 
 class GastoService
 {
     private $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    private $gastoRepository;
+
+    public function __construct(EntityManagerInterface $entityManager, GastoRepository $gastoRepository)
     {
         $this->entityManager = $entityManager;
+        $this->gastoRepository = $gastoRepository;
     }
 
     public function crearGasto(string $descripcion, int $valor, Tarjeta $tarjeta, \DateTime $fechaGasto, GastoTipo $tipoGasto): Gasto
@@ -29,5 +34,10 @@ class GastoService
         $this->entityManager->flush();
 
         return $gasto;
+    }
+
+    public function findByTarjeta(Tarjeta $tarjeta) {
+        $gastos = $this->gastoRepository->findBy(['tarjeta' => $tarjeta]);
+        return $gastos;
     }
 }
